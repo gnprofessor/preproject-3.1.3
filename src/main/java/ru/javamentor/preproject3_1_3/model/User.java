@@ -1,6 +1,5 @@
 package ru.javamentor.preproject3_1_3.model;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 

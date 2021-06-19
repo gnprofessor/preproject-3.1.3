@@ -97,42 +97,42 @@
                                     <div class="card">
                                         <h5 class="card-header">Add new user</h5>
                                         <div class="card-body">
-                                            <form th:method="post" th:action="@{/admin}" th:object="${newUser}">
+                                            <form id="new-form">
                                                 <div class="form-group">
                                                     <label for="firstName">First name</label>
                                                     <input type="text" class="form-control" id="firstName"
-                                                           th:field="*{name}" required>
+                                                           name="name" required>
                                                 </div>
                                                 <div class="form-group">
                                                     <label for="lastName">Last name</label>
                                                     <input type="text" class="form-control" id="lastName"
-                                                           th:field="*{lastName}" required>
+                                                           name="lastName" required>
                                                 </div>
                                                 <div class="form-group">
                                                     <label for="age">Age</label>
-                                                    <input type="number" class="form-control" id="age" th:field="*{age}"
+                                                    <input type="number" class="form-control" id="age" name="age"
                                                            required>
                                                 </div>
                                                 <div class="form-group">
                                                     <label for="email">Email</label>
                                                     <input type="email" class="form-control" id="email"
-                                                           th:field="*{email}" required>
+                                                           name="email" required>
                                                 </div>
                                                 <div class="form-group">
                                                     <label for="password">Password</label>
                                                     <input type="password" class="form-control" id="password"
-                                                           th:field="*{password}" required>
+                                                           name="password" required>
                                                 </div>
                                                 <div class="form-group">
                                                     <label for="roles">Role</label>
-                                                    <select multiple class="form-control" id="roles" name="roless"
+                                                    <select multiple class="form-control" id="roles" name="roles[]"
                                                             size="2">
                                                         <option th:each="role : ${allRoles}"
-                                                                th:value="${role.getRole()}"
+                                                                th:value="${role.getId()}"
                                                                 th:text="${role.getRole()}"></option>
                                                     </select>
                                                 </div>
-                                                <button type="submit" class="btn btn-success">Add new user</button>
+                                                <button type="button" class="btn btn-success" onclick="createUser()">Add new user</button>
                                             </form>
                                         </div>
                                     </div>
@@ -220,14 +220,14 @@
                                 </div>
                                 <div class="form-group">
                                     <label for="rolesEdit">Role</label>
-                                    <select multiple class="form-control" id="rolesEdit" name="roless"
+                                    <select multiple class="form-control" id="rolesEdit" name="roles[]"
                                             size="2"></select>
                                 </div>
                                 <div class="modal-footer">
                                     <button type="button" class="btn btn-secondary" id="modalDismiss"
                                             data-dismiss="modal">Close
                                     </button>
-                                    <button type="submit" class="btn" id="editSubmit">Edit</button>
+                                    <button type="button" class="btn" id="editSubmit">Edit</button>
                                 </div>
                             </form>
                         </div>
@@ -240,9 +240,54 @@
 <script th:src="@{/js/scripts.min.js}"></script>
 <script>
 
-    $('#modal-form').submit(function (e) {
-        e.preventDefault();
-        let form = $(this);
+    const tbody = $("#mainTable tbody");
+    $(document).ready(() => {
+        getAllUsers();
+    });
+
+    function getAllUsers() {
+        fetch("/api/users").then((response) => {
+            if (response.ok) {
+                response.json().then((users) => {
+                    users.forEach((user) => {
+                        addUserRow(user)
+                    });
+                });
+            } else {
+                console.error(response.status + " - " + response.statusText);
+            }
+        });
+    }
+
+    function createUser() {
+        let form = $('#new-form');
+        let user = {
+            'name': form.find('#firstName').val(),
+            'lastName': form.find('#lastName').val(),
+            'age': parseInt(form.find('#age').val()),
+            'email': form.find('#email').val(),
+            'password': form.find('#password').val(),
+            'roles': form.find('#roles').val().map(id => parseInt(id))
+        };
+        let headers = new Headers();
+        headers.append('Content-Type', 'application/json; charset=utf-8');
+        let request = new Request('/api/users', {
+            method: 'POST',
+            headers: headers,
+            body: JSON.stringify(user)
+        });
+        console.log(user);
+        fetch(request).then((response) => {
+            response.json().then((userReturned) => {
+                tbody.empty();
+                getAllUsers();
+                console.log(userReturned)
+            })
+        })
+    }
+
+    function updateUser () {
+        let form = $('#modal-form');
         let user = {
             'id': parseInt(form.find('#idEdit').val()),
             'name': form.find('#firstNameEdit').val(),
@@ -250,9 +295,8 @@
             'age': parseInt(form.find('#ageEdit').val()),
             'email': form.find('#emailEdit').val(),
             'password': form.find('#passwordEdit').val(),
-            'roles': form.find('#rolesEdit').val()
+            'roles': form.find('#rolesEdit').val().map(id => parseInt(id))
         };
-        console.log(user);
         let headers = new Headers();
         headers.append('Content-Type', 'application/json; charset=utf-8');
         let request = new Request("api/users", {
@@ -260,96 +304,68 @@
             headers: headers,
             body: JSON.stringify(user),
         });
-
+        $('#editModal').modal('hide');
         fetch(request).then((response) => {
             response.json().then((userReturned) => {
+                $("#name"+userReturned.id).text(userReturned.name);
+                $("#lastName"+userReturned.id).text(userReturned.lastName);
+                $("#age"+userReturned.id).text(userReturned.age);
+                $("#email"+userReturned.id).text(userReturned.email);
+                $("#roles"+userReturned.id).text(userReturned.roles.map(role => role.role));
                 console.log(userReturned);
             })
         })
-    });
+    }
+
+    function deleteUser(userId) {
+        fetch("/api/users/"+userId, {method: "DELETE"})
+            .then((response) => {
+                if (response.status === 404 || response.status === 400) {
+                    response.text().then((value) => console.warn("Error message: " + value));
+                    return;
+                }
+                tbody.find('#'+userId).remove();
+                $('#editModal').modal('hide');
+            })
+    }
+
 
     function editModal(userId) {
         $('#editModal').modal('show');
         $('#editModal .modal-header h5').text('Edit user');
-        $('#editSubmit').text('Edit').addClass('btn btn-primary');
-        fetch("/api/roles").then((response) => {
-            if (response.ok) {
-                response.json().then((roles) => {
-                    let option = '';
-                    roles.forEach((role) => {
-                        option += '<option value="' + role.role + '">' + role.role + '</option>';
-                    });
-                    $('#rolesEdit').append(option);
-                });
-            } else {
-                console.error(response.status + " - " + response.statusText);
-            }
-        });
+        $('#editSubmit').text('Edit').addClass('btn btn-primary').attr('onClick', 'updateUser();');
 
-        fetch("api/users/" + userId).then((response) => {
-            if (response.ok) {
-                response.json().then((user) => {
-                    $('#method').val('patch');
-                    $('#idEdit').val(user.id);
-                    $('#firstNameEdit').val(user.name);
-                    $('#lastNameEdit').val(user.lastName);
-                    $('#ageEdit').val(user.age);
-                    $('#emailEdit').val(user.email);
-                    $('#passwordEdit').val(user.password);
-                    $('#rolesEdit option').each(function () {
-                        console.log($(this).val());
-                        console.log(user.roles);
-                        for (let i = 0; i < user.roles.length; i++) {
-                            console.log(user.roles[i].role);
-                            if (user.roles[i].role === $(this).val()) {
-                                $(this).attr('selected', true);
-                            }
-                        }
-                    })
-                })
-            } else {
-                console.error(response.status + " - " + response.statusText);
-            }
-        });
+        getRoles();
+        getUserByid(userId)
     }
 
     function deleteModal(userId) {
-        editModal(userId);
+        $('#editModal').modal('show');
         $('#editModal .modal-header h5').text('Delete user');
+
+        getRoles();
+        getUserByid(userId)
+
         $('#passwordEdit').remove();
         $('#firstNameEdit').prop('readonly', true);
         $('#lastNameEdit').prop('readonly', true);
         $('#ageEdit').prop('readonly', true);
         $('#emailEdit').prop('readonly', true);
         $('#rolesEdit').prop('disabled', true);
-        $('#editSubmit').text('Delete').addClass('btn btn-danger');
+        $('#editSubmit').text('Delete').addClass('btn btn-danger').attr('onClick', 'deleteUser('+ userId + ');');
         $('#method').val('delete');
     }
-
-    const tbody = $("#mainTable tbody");
-
-    fetch("/api/users").then((response) => {
-        if (response.ok) {
-            response.json().then((users) => {
-                users.forEach((user) => {
-                    addUserRow(user)
-                });
-            });
-        } else {
-            console.error(response.status + " - " + response.statusText);
-        }
-    });
 
     function addUserRow(user) {
         tbody.append("<tr valign='middle' id='" + user.id + "'>" +
             "<th scope='row'>" + user.id + "</th>" +
-            "<td>" + user.name + "</td>" +
-            "<td>" + user.lastName + "</td>" +
-            "<td>" + user.age + "</td>" +
-            "<td>" + user.email + "</td>" +
-            "<td>" + user.roles.map(role => role.role) + "</td>" +
-            "<td><a class='btn btn-info' href='/admin/" + user.id + "/edit' onclick='event.preventDefault(); editModal(" + user.id + ")'>Edit</a></td>" +
-            "<td><a class='btn btn-danger' href='/admin/" + user.id + "/edit' onclick='event.preventDefault(); deleteModal(" + user.id + ")'>Delete</a></td></tr>")
+            "<td id='name" + user.id + "'>" + user.name + "</td>" +
+            "<td id='lastName" + user.id + "'>" + user.lastName + "</td>" +
+            "<td id='age" + user.id + "'>" + user.age + "</td>" +
+            "<td id='email" + user.id + "'>" + user.email + "</td>" +
+            "<td id='roles" + user.id + "'>" + user.roles.map(role => role.role) + "</td>" +
+            "<td><button class='btn btn-info' onclick='event.preventDefault(); editModal(" + user.id + ")'>Edit</button></td>" +
+            "<td><button class='btn btn-danger' onclick='event.preventDefault(); deleteModal(" + user.id + ")'>Delete</button></td></tr>")
     }
 
     $('#editModal').on('hidden.bs.modal', function () {
@@ -365,7 +381,47 @@
         $('#passwordEdit').val('').prop('readonly', false);
         $('#rolesEdit').prop('disabled', false);
         $('#rolesEdit option').remove();
-        $('#editSubmit').removeAttr('class');
+        $('#editSubmit').removeAttr('class').removeAttr('onClick');
+    }
+
+    function getRoles() {
+        fetch("/api/roles").then((response) => {
+            if (response.ok) {
+                response.json().then((roles) => {
+                    let option = '';
+                    roles.forEach((role) => {
+                        option += '<option value="' + role.id + '">' + role.role + '</option>';
+                    });
+                    $('#rolesEdit').append(option);
+                });
+            } else {
+                console.error(response.status + " - " + response.statusText);
+            }
+        });
+    }
+    function getUserByid(userId) {
+        fetch("api/users/" + userId).then((response) => {
+            if (response.ok) {
+                response.json().then((user) => {
+                    $('#method').val('patch');
+                    $('#idEdit').val(user.id);
+                    $('#firstNameEdit').val(user.name);
+                    $('#lastNameEdit').val(user.lastName);
+                    $('#ageEdit').val(user.age);
+                    $('#emailEdit').val(user.email);
+                    $('#passwordEdit').val(user.password);
+                    $('#rolesEdit option').each(function () {
+                        for (let i = 0; i < user.roles.length; i++) {
+                            if (user.roles[i].id == $(this).val()) {
+                                $(this).attr('selected', true);
+                            }
+                        }
+                    })
+                })
+            } else {
+                console.error(response.status + " - " + response.statusText);
+            }
+        });
     }
 </script>
 </body>

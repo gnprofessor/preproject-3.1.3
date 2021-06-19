@@ -1,7 +1,5 @@
 package ru.javamentor.preproject3_1_3.controller;
 
-import com.fasterxml.jackson.annotation.JacksonAnnotation;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -33,16 +31,25 @@ public class AdminRestController {
         return ResponseEntity.ok(userService.findById(id));
     }
 
+    @PostMapping("/users")
+    public ResponseEntity<User> createUser(@RequestBody User user) {
+        return ResponseEntity.ok(userService.saveUser(user));
+    }
+
     @PatchMapping("/users")
-    public ResponseEntity<User> editUser(@RequestBody User user, @RequestParam(value = "roless", required = false) String[] roles) {
+    public ResponseEntity<User> editUser(@RequestBody User user) {
         userService.saveUser(user);
-        return ResponseEntity.ok(user);
+        return ResponseEntity.ok(userService.findById(user.getId()));
+    }
+
+    @DeleteMapping("/users/{id}")
+    public ResponseEntity<Void> delete(@PathVariable("id") long id) {
+        userService.deleteUser(id);
+        return new ResponseEntity<>(HttpStatus.OK);
     }
 
     @GetMapping(value = "/roles")
     public ResponseEntity<List<Role>> findAllRoles() {
         return ResponseEntity.ok(roleService.findAll());
     }
-
-
 }
