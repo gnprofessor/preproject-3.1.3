@@ -1,6 +1,5 @@
 package ru.javamentor.preproject3_1_3.model;
 
-import org.springframework.data.domain.Persistable;
 import org.springframework.security.core.GrantedAuthority;
 
 import javax.persistence.*;
@@ -15,7 +14,7 @@ public class Role implements GrantedAuthority {
     private Long id;
 
     @Column(name = "role", unique = true)
-    private String role;
+    private String name;
 
     @ManyToMany(mappedBy = "roles", fetch = FetchType.LAZY)
     private List<User> users = new ArrayList<>();
@@ -23,8 +22,8 @@ public class Role implements GrantedAuthority {
     public Role() {
     }
 
-    public Role(String role) {
-        this.role = role;
+    public Role(String name) {
+        this.name = name;
     }
 
     public Role(Long id) {
@@ -39,21 +38,21 @@ public class Role implements GrantedAuthority {
         this.id = id;
     }
 
-    public String getRole() {
-        return role;
+    public String getName() {
+        return name;
     }
 
-    public void setRole(String role) {
-        this.role = role;
+    public void setName(String name) {
+        this.name = name;
     }
 
     @Override
     public String getAuthority() {
-        return role;
+        return name;
     }
 
     @Override
     public String toString() {
-        return role;
+        return name;
     }
 }

@@ -15,8 +15,8 @@
     <div class="row">
         <div class="col">
             <div class="info"><span th:text="${user.getEmail()}"></span> with roles:
-                <ul th:each="role : ${user.getRoles()}">
-                    <li th:text="${role}"></li>
+                <ul th:each="name : ${user.getRoles()}">
+                    <li th:text="${name}"></li>
                 </ul>
             </div>
         </div>
@@ -28,16 +28,16 @@
 <div class="container-fluid" id="main">
     <div class="row main-row">
         <div class="col-3 left-panel">
-            <div class="nav flex-column nav-pills" id="v-pills-tab" role="tablist" aria-orientation="vertical">
-                <a class="nav-link active" id="v-pills-admin-tab" data-toggle="pill" href="#v-pills-admin" role="tab"
+            <div class="nav flex-column nav-pills" id="v-pills-tab" name="tablist" aria-orientation="vertical">
+                <a class="nav-link active" id="v-pills-admin-tab" data-toggle="pill" href="#v-pills-admin" name="tab"
                    aria-controls="v-pills-admin" aria-selected="true">Admin</a>
-                <a class="nav-link" id="v-pills-user-tab" data-toggle="pill" href="#v-pills-user" role="tab"
+                <a class="nav-link" id="v-pills-user-tab" data-toggle="pill" href="#v-pills-user" name="tab"
                    aria-controls="v-pills-user" aria-selected="false">User</a>
             </div>
         </div>
         <div class="col-9 right-panel">
             <div class="tab-content" id="v-pills-tabContent">
-                <div class="tab-pane fade show active" id="v-pills-admin" role="tabpanel"
+                <div class="tab-pane fade show active" id="v-pills-admin" name="tabpanel"
                      aria-labelledby="v-pills-admin-tab">
                     <div class="row">
                         <div class="col">
@@ -46,18 +46,18 @@
                     </div>
                     <div class="row">
                         <div class="col">
-                            <ul class="nav nav-tabs" id="myTab" role="tablist">
-                                <li class="nav-item" role="presentation">
+                            <ul class="nav nav-tabs" id="myTab" name="tablist">
+                                <li class="nav-item" name="presentation">
                                     <a class="nav-link active" id="user-table-tab" data-toggle="tab" href="#user-table"
-                                       role="tab" aria-controls="user-table" aria-selected="true">User table</a>
+                                       name="tab" aria-controls="user-table" aria-selected="true">User table</a>
                                 </li>
-                                <li class="nav-item" role="presentation">
-                                    <a class="nav-link" id="new-user-tab" data-toggle="tab" href="#new-user" role="tab"
+                                <li class="nav-item" name="presentation">
+                                    <a class="nav-link" id="new-user-tab" data-toggle="tab" href="#new-user" name="tab"
                                        aria-controls="new-user" aria-selected="false">New user</a>
                                 </li>
                             </ul>
                             <div class="tab-content" id="myTabContent">
-                                <div class="tab-pane fade show active" id="user-table" role="tabpanel"
+                                <div class="tab-pane fade show active" id="user-table" name="tabpanel"
                                      aria-labelledby="user-table-tab">
                                     <div class="card">
                                         <h5 class="card-header">All users</h5>
@@ -93,7 +93,7 @@
                                         </div>
                                     </div>
                                 </div>
-                                <div class="tab-pane fade" id="new-user" role="tabpanel" aria-labelledby="new-user-tab">
+                                <div class="tab-pane fade" id="new-user" name="tabpanel" aria-labelledby="new-user-tab">
                                     <div class="card">
                                         <h5 class="card-header">Add new user</h5>
                                         <div class="card-body">
@@ -129,7 +129,7 @@
                                                             size="2">
                                                         <option th:each="role : ${allRoles}"
                                                                 th:value="${role.getId()}"
-                                                                th:text="${role.getRole()}"></option>
+                                                                th:text="${role.getName()}"></option>
                                                     </select>
                                                 </div>
                                                 <button type="button" class="btn btn-success" onclick="createUser()">Add new user</button>
@@ -141,7 +141,7 @@
                         </div>
                     </div>
                 </div>
-                <div class="tab-pane fade" id="v-pills-user" role="tabpanel" aria-labelledby="v-pills-user-tab">
+                <div class="tab-pane fade" id="v-pills-user" name="tabpanel" aria-labelledby="v-pills-user-tab">
                     <div class="row">
                         <div class="col">
                             <h1>User information-page</h1>
@@ -181,7 +181,7 @@
                 </div>
             </div>
             <!-- Modal edit-->
-            <div class="modal fade" id="editModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
+            <div class="modal fade" id="editModal" tabindex="-1" name="dialog" aria-labelledby="exampleModalLabel"
                  aria-hidden="true">
                 <div class="modal-dialog">
                     <div class="modal-content" id="modalContent">
@@ -311,7 +311,7 @@
                 $("#lastName"+userReturned.id).text(userReturned.lastName);
                 $("#age"+userReturned.id).text(userReturned.age);
                 $("#email"+userReturned.id).text(userReturned.email);
-                $("#roles"+userReturned.id).text(userReturned.roles.map(role => role.role));
+                $("#roles"+userReturned.id).text(userReturned.roles.map(role => role.name));
                 console.log(userReturned);
             })
         })
@@ -363,7 +363,7 @@
             "<td id='lastName" + user.id + "'>" + user.lastName + "</td>" +
             "<td id='age" + user.id + "'>" + user.age + "</td>" +
             "<td id='email" + user.id + "'>" + user.email + "</td>" +
-            "<td id='roles" + user.id + "'>" + user.roles.map(role => role.role) + "</td>" +
+            "<td id='roles" + user.id + "'>" + user.roles.map(role => role.name) + "</td>" +
             "<td><button class='btn btn-info' onclick='event.preventDefault(); editModal(" + user.id + ")'>Edit</button></td>" +
             "<td><button class='btn btn-danger' onclick='event.preventDefault(); deleteModal(" + user.id + ")'>Delete</button></td></tr>")
     }
@@ -390,7 +390,7 @@
                 response.json().then((roles) => {
                     let option = '';
                     roles.forEach((role) => {
-                        option += '<option value="' + role.id + '">' + role.role + '</option>';
+                        option += '<option value="' + role.id + '">' + role.name + '</option>';
                     });
                     $('#rolesEdit').append(option);
                 });

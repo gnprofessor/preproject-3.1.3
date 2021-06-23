@@ -13,10 +13,14 @@ import java.security.Principal;
 @RequestMapping("/admin")
 public class AdminController {
 
+    private final UserService userService;
+    private final RoleService roleService;
+
     @Autowired
-    private UserService userService;
-    @Autowired
-    private RoleService roleService;
+    public AdminController(UserService userService, RoleService roleService) {
+        this.userService = userService;
+        this.roleService = roleService;
+    }
 
     @GetMapping()
     public String index(ModelMap model, Principal user) {

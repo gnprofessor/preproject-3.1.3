@@ -15,11 +15,14 @@ import java.util.List;
 @RequestMapping("/api")
 public class AdminRestController {
 
-    @Autowired
-    private UserService userService;
+    private final UserService userService;
+    private final RoleService roleService;
 
     @Autowired
-    private RoleService roleService;
+    public AdminRestController(UserService userService, RoleService roleService) {
+        this.userService = userService;
+        this.roleService = roleService;
+    }
 
     @GetMapping("/users")
     public ResponseEntity<List<User>> getAllUsers() {
