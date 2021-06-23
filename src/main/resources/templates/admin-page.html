@@ -299,7 +299,7 @@
         };
         let headers = new Headers();
         headers.append('Content-Type', 'application/json; charset=utf-8');
-        let request = new Request("api/users", {
+        let request = new Request("api/users/"+user.id, {
             method: 'PATCH',
             headers: headers,
             body: JSON.stringify(user),

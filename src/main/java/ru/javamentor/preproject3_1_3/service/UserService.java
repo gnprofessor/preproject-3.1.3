@@ -9,6 +9,7 @@ public interface UserService extends UserDetailsService {
     User findUserByEmail(String email);
     List<User> findAll();
     User findById(long id);
-    User saveUser(User user);
+    User createUser(User user);
+    User updateUser(User user);
     void deleteUser(long id);
 }

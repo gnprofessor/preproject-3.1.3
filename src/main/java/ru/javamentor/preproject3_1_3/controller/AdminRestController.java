@@ -18,7 +18,6 @@ public class AdminRestController {
     private final UserService userService;
     private final RoleService roleService;
 
-    @Autowired
     public AdminRestController(UserService userService, RoleService roleService) {
         this.userService = userService;
         this.roleService = roleService;
@@ -36,13 +35,13 @@ public class AdminRestController {
 
     @PostMapping("/users")
     public ResponseEntity<User> createUser(@RequestBody User user) {
-        return ResponseEntity.ok(userService.saveUser(user));
+        return ResponseEntity.ok(userService.createUser(user));
     }
 
-    @PatchMapping("/users")
-    public ResponseEntity<User> editUser(@RequestBody User user) {
-        userService.saveUser(user);
-        return ResponseEntity.ok(userService.findById(user.getId()));
+    @PatchMapping("/users/{id}") // добавить id
+    public ResponseEntity<User> editUser(@RequestBody User user, @PathVariable long id) {
+        //userService.saveUser(user);
+        return ResponseEntity.ok(userService.updateUser(user));
     }
 
     @DeleteMapping("/users/{id}")
